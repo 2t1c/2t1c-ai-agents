@@ -4,10 +4,72 @@
 
 This is an automated run of a scheduled task. The user is not present to answer questions.
 
-Use the Notion MCP connector (mcp__8c435ebc) for ALL Notion operations — notion-search, notion-fetch, notion-update-page.
-Use the Typefully MCP for all Typefully operations.
 Typefully social set ID for GeniusGTX (@GeniusGTX_2): 151393
 Notion Idea Pipeline data source: collection://330aef7b-3feb-401e-abba-28452441a64d
+
+═══ PHASE -1: TOOL PRE-FLIGHT (run BEFORE anything else) ═══
+
+This task depends on MCP connectors that load as "deferred tools" in Claude Code. On cold-start cron runs, the deferred-tool listing may not be announced to the agent on the first try — schemas must be pulled via ToolSearch before the tools can be called. Do NOT assume they are loaded. Do NOT proceed to Phase 0 until pre-flight passes.
+
+REQUIRED TOOLS (by exact name):
+
+Notion (writes to the Idea Pipeline — HARD requirement):
+- mcp__Notion__notion-fetch
+- mcp__Notion__notion-search
+- mcp__Notion__notion-update-page
+
+Typefully (creates drafts for social set 151393 — HARD requirement):
+- mcp__Typefully__typefully_create_draft
+- mcp__Typefully__typefully_list_social_sets  (used for the pre-flight smoke test)
+
+Research (used in Phase 2 — SOFT requirement, falls back if missing):
+- mcp__Tavily__tavily_search
+- mcp__Tavily__tavily_extract
+
+Built-in fallbacks (always available, use only if Tavily is missing): WebSearch, WebFetch.
+
+DISCOVERY LOOP (retry up to 4 attempts with exponential backoff):
+
+Attempt 1 — immediate. Run these ToolSearch calls in parallel:
+  ToolSearch("select:mcp__Notion__notion-fetch,mcp__Notion__notion-search,mcp__Notion__notion-update-page", 10)
+  ToolSearch("select:mcp__Typefully__typefully_create_draft,mcp__Typefully__typefully_list_social_sets", 10)
+  ToolSearch("select:mcp__Tavily__tavily_search,mcp__Tavily__tavily_extract", 10)
+
+After each attempt, check which required tools loaded.
+
+If ANY hard-required Notion or Typefully tool is still missing:
+  Attempt 2 — wait 15s, retry the full parallel set.
+  Attempt 3 — wait 30s, retry the full parallel set.
+  Attempt 4 — wait 60s, retry the full parallel set.
+
+Log at each attempt which tools are still missing by exact name. Never silently retry.
+
+If Tavily tools are missing after attempt 4, do NOT block. Proceed with WebSearch/WebFetch fallback and record "Tavily unavailable, using WebSearch/WebFetch fallback" in the Phase 9 report.
+
+ABORT CRITERIA (hard, non-negotiable):
+After 4 attempts, if ANY of these are still missing:
+  - mcp__Notion__notion-fetch
+  - mcp__Notion__notion-search
+  - mcp__Notion__notion-update-page
+  - mcp__Typefully__typefully_create_draft
+...ABORT the run immediately. Do not attempt partial work. Skip directly to Phase 9 and emit this report:
+
+  ═══ BLOCKED — MCP CONNECTORS MISSING ═══
+  Missing tools after 4 attempts (15s → 30s → 60s backoff):
+  - [exact tool name 1]
+  - [exact tool name 2]
+  ...
+  Pipeline snapshot: UNAVAILABLE — Notion MCP not loaded.
+  Drafts produced this run: 0
+  Remediation: Verify Notion/Typefully MCP servers are attached to the scheduled trigger config in Claude Code web UI. If attached, investigate cold-start connector warmup timing.
+
+SMOKE TEST (after discovery passes, BEFORE Phase 0):
+1. Call mcp__Notion__notion-fetch on collection://330aef7b-3feb-401e-abba-28452441a64d. Confirm the Idea Pipeline schema returns with a property list including Status, Urgency, Source URL, Typefully Draft ID.
+2. Call mcp__Typefully__typefully_list_social_sets. Confirm social set 151393 (GeniusGTX / @GeniusGTX_2) is present in the response.
+
+If EITHER smoke test fails (tool loaded but call errors, or expected data not present), treat the run as aborted. Follow the ABORT CRITERIA reporting path above and include the failing call + error message in the report. Do NOT silently fall through to Phase 0 on a broken connector — a loaded tool schema does not prove the underlying MCP server is healthy.
+
+═══ END PHASE -1 — only proceed to Phase 0 if all HARD requirements loaded AND both smoke tests passed ═══
 
 ⚠️ HARD LIMITS (non-negotiable, override everything else):
 - Maximum 3 Typefully drafts per run. After creating 3 drafts, STOP. Do not create more under any circumstances.
@@ -76,11 +138,13 @@ At least 1 direct quote from the source in quotation marks, attributed by name (
 1 unexpected connection one layer below the surface — the detail nobody else is covering
 How to research:
 
-Check the Source URL first for primary facts — use web_fetch on the URL
-Search for additional context, counter-arguments, and specific numbers using web_search
-If the source is a video/podcast: find the transcript and pull the most powerful line verbatim
-If the source is a tweet: read the full thread and any linked articles
-If the source is an article: find the original data or study being cited
+Preferred tools: mcp__Tavily__tavily_extract for the Source URL, mcp__Tavily__tavily_search for additional context. Fallback (only if Phase -1 marked Tavily unavailable): WebFetch and WebSearch.
+
+Check the Source URL first for primary facts — use mcp__Tavily__tavily_extract (or WebFetch fallback) on the URL.
+Search for additional context, counter-arguments, and specific numbers using mcp__Tavily__tavily_search (or WebSearch fallback).
+If the source is a video/podcast: find the transcript and pull the most powerful line verbatim.
+If the source is a tweet: read the full thread and any linked articles.
+If the source is an article: find the original data or study being cited.
 Attribution rule: When using a quote, always name the person. Never use an unattributed quote.
 
 Never write with vague facts. If you can't find at least 3 specific data points, skip this idea, set it back to "New" using notion-update-page, and pick the next one.
