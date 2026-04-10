@@ -1,0 +1,18 @@
+{
+  "2026-04-02": {
+    "posts": true,
+    "write": false,
+    "read": false,
+    "cardio": false,
+    "study": false,
+    "strength": false
+  },
+  "2026-04-04": {
+    "posts": false,
+    "write": false,
+    "read": false,
+    "cardio": false,
+    "study": false,
+    "strength": false
+  }
+}

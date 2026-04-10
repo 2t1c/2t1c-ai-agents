@@ -1,0 +1,5 @@
+/Library/Developer/CommandLineTools/usr/bin/python3: Error while finding module specification for 'agents.ceo.telegram_bot' (ModuleNotFoundError: No module named 'agents')
+/Library/Developer/CommandLineTools/usr/bin/python3: Error while finding module specification for 'agents.ceo.telegram_bot' (ModuleNotFoundError: No module named 'agents')
+shell-init: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+/bin/bash: /Users/toantruong/Desktop/AI Agents/2t1c-content-ops/scripts/run-ceo-bot.sh: Operation not permitted
+/Library/Developer/CommandLineTools/usr/bin/python3: can't open file '/Users/toantruong/Desktop/AI Agents/2t1c-content-ops/scripts/run_ceo_bot.py': [Errno 1] Operation not permitted

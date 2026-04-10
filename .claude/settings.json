@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__claude_ai_Notion__notion-create-view",
+      "Bash(python3 -m pipeline.weekly_report --dry-run)",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\(''tools/notion_client.py''\\).read\\(\\)\\); ast.parse\\(open\\(''agents/kai/agent.py''\\).read\\(\\)\\); print\\(''✅ Both files valid''\\)\")",
+      "Bash(python3 -c \":*)",
+      "mcp__notion__API-post-search",
+      "Bash(python3 -m pipeline.weekly_report --dry-run --start 2026-01-01 --end 2026-01-07)",
+      "mcp__claude_ai_Notion__notion-update-page"
+    ]
+  }
+}
