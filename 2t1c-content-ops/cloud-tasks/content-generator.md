@@ -42,10 +42,10 @@ These five files are the **complete voice + structure rulebook**. Apply them exa
 - **Notion Idea Pipeline data source:** `collection://330aef7b-3feb-401e-abba-28452441a64d`
 - **Typefully social set ID** (GeniusGTX_2): `151393`
 - **Use the Notion MCP** for Notion operations:
-  - `notion-fetch` — read a single page or data source schema
+  - `notion-fetch` — read a single page (returns full properties) or data source schema
   - `notion-update-page` — write to a page
-  - `mcp__notion__API-query-data-source` — **REAL filter queries** (use this for "give me all pages where Status = X")
-  - `notion-search` — semantic search ONLY (use only for fuzzy text discovery, NEVER for Status filtering — semantic search does not honor property filters and returns relevance-ranked results, not filtered results)
+  - `notion-search` — enumerate pages in a data source (semantic; **does NOT honor property filters**)
+- **There is no property-filter query tool.** The cloud-routine Notion MCP does not include `API-query-data-source`. The only way to filter by Status is enumerate-then-verify (see Phase 0 below).
 - **Use the Typefully MCP** for all Typefully operations
 
 ---
@@ -60,51 +60,79 @@ These five files are the **complete voice + structure rulebook**. Apply them exa
 
 ---
 
-## PHASE 0 — PIPELINE AUDIT
+## PHASE 0 — FIND NEW IDEAS (marker-based fast path)
 
-Before anything else, get a full view of the pipeline.
+**The marker convention.** New ideas in the Idea Pipeline have **`🆕 `** prepended to their title (added by the ideation agent at card creation). This makes them findable by `notion-search` query, bypassing the Notion MCP's lack of a property-filter query tool.
 
-**⚠️ CRITICAL: Use `mcp__notion__API-query-data-source`, NOT `notion-search`.**
+State machine (relevant to this task):
 
-`notion-search` is **semantic search** — it ranks pages by text relevance and ignores structured property filters. Querying it with "Status = New" returns relevance-similar pages, not pages where the Status property actually equals "New". This is the most common failure mode of this task.
+| Status | Title prefix | Set by | Removed by |
+|---|---|---|---|
+| New | `🆕 ` | Ideation agent | content-generator (Phase 1, when picking) |
+| Writing | (none) | content-generator | (next transition) |
+| Needs Media | `📺 ` | content-generator (Phase 8, when handing off) | media-attacher (when media done) |
+| Ready for Review | (none) | media-attacher | — |
 
-The correct tool is `mcp__notion__API-query-data-source` — it executes real database filter queries against the Notion API.
+### Step 1 — Confirm Notion schema
 
-### Step 1 — Fetch the schema
+Call `notion-fetch` on `collection://330aef7b-3feb-401e-abba-28452441a64d`. From the response, note:
+- The exact title property name (typically `Idea`)
+- The Status property type and its select option values
 
-Use `notion-fetch` on `collection://330aef7b-3feb-401e-abba-28452441a64d` to confirm the exact name of the Status property and its select option values.
+### Step 2 — Search for the 🆕 marker
 
-### Step 2 — Query each status bucket via API-query-data-source (run in parallel)
-
-Data source ID: `330aef7b-3feb-401e-abba-28452441a64d` (strip the `collection://` prefix).
-
-For EACH of the 8 status values, call `mcp__notion__API-query-data-source` with this exact filter shape:
+Call `notion-search`:
 
 ```json
 {
-  "data_source_id": "330aef7b-3feb-401e-abba-28452441a64d",
-  "filter": {
-    "property": "Status",
-    "select": {
-      "equals": "New"
-    }
-  },
-  "page_size": 100
+  "query": "🆕",
+  "data_source_url": "collection://330aef7b-3feb-401e-abba-28452441a64d",
+  "page_size": 25
 }
 ```
 
-Run all 8 queries in parallel, one per status value:
-- "New", "Writing", "Needs Media", "Ready for Review", "Approved", "Scheduled", "Published", "Killed"
+Title-match results land at the top — these are reliable. Paginate via `start_cursor` only if the first response indicates more results.
 
-If the Status property type is not `select` (could be `status` in Notion's newer schema), use `"status": { "equals": "New" }` instead. The schema fetched in Step 1 will tell you which.
+### Step 3 — Verify each candidate
 
-Each query returns ONLY pages where the Status property genuinely equals the queried value. No semantic noise. No guessing.
+For each search result, call `notion-fetch` on the page ID. Confirm BOTH:
 
-### Step 2 fallback (only if API-query-data-source is unavailable)
+1. The title still starts with `🆕 ` (defense against false positives from semantic noise)
+2. Status property genuinely equals `"New"` (defense against stale markers left on cards that already moved)
 
-If the `mcp__notion__API-query-data-source` tool failed to load or is otherwise unavailable:
-1. Call `mcp__notion__API-post-search` with `query: ""` (empty) and `filter: { "property": "object", "value": "page" }` to get all pages, then client-side filter by `properties.Status.select.name`. Slow but correct.
-2. **Do NOT fall back to `notion-search` with property filters** — it will silently return wrong results and the task will burn its 3-draft budget on stale or duplicate ideas.
+If either check fails, skip the candidate. **If a card has `🆕` in title but Status is not "New" → log it for cleanup but do not pick.**
+
+For each verified "New" candidate, collect: Idea title (with marker), Urgency, Source URL, QRT Source URL, Source Type, Topic Tags, Notes, Created time.
+
+### Step 4 — Snapshot
+
+Just report what you found:
+
+```
+═══ NEW IDEAS FOUND VIA 🆕 MARKER ═══
+Total: [count]
+By urgency:
+  🔴 Breaking: [count]
+  🟡 Trending: [count]
+  🟢 Evergreen: [count]
+  ⚪ Backlog: [count]
+
+Cleanup needed (🆕 marker on non-New card): [count]
+[list any]
+```
+
+Full pipeline-wide status counts are not part of this task. The pipeline-qa task handles full audits.
+
+### Stalled recovery (deferred)
+
+This task does not auto-recover stalled "Writing" cards (cards in Writing status with no Typefully Draft ID — meaning a prior run failed mid-flight). The Notion MCP can't filter by Status efficiently, so a per-run enumeration would dominate runtime.
+
+If you find a stuck card manually, fix it by:
+- Resetting Status → "New"
+- Re-adding `🆕 ` to the title prefix
+- It will be picked up on the next content-generator run.
+
+Pipeline-qa will surface stalled cards in its daily report.
 
 ### Output — Pipeline snapshot
 
@@ -127,9 +155,9 @@ This snapshot goes in the final report.
 
 ## PHASE 1 — PICK IDEAS
 
-Use the results from the Status = "New" query already fetched in Phase 0. Do NOT run a new search.
+Use the verified "New" candidates from Phase 0. Do NOT run a new search.
 
-If "New" returned 0 results, conclude the pipeline is empty and stop.
+If 0 New candidates were found, conclude the pipeline is empty and stop.
 
 **Priority order:**
 
@@ -138,15 +166,20 @@ If "New" returned 0 results, conclude the pipeline is empty and stop.
 - 🟢 Evergreen
 - ⚪ Backlog (lowest)
 
-Pick **2-3 ideas. NEVER more than 3.** Set each to Status → "Writing" immediately using `notion-update-page`.
+Pick **2-3 ideas. NEVER more than 3.**
 
-### Recover stalled ideas
+### For each picked idea, immediately update Notion (state transition: New → Writing)
 
-Use the results from the Status = "Writing" query already fetched in Phase 0. For each, check if it has a Typefully Draft ID. If empty, treat it as a failed prior run — include it in this run's batch.
+Call `notion-update-page` with both changes in one call:
 
-Recovered ideas do NOT count against the 2-3 pick limit, BUT the total draft count (picked + recovered) must still not exceed 3. If recovering would push past 3, pick fewer new ideas.
+1. **Strip `🆕 ` from the title.** Update the title property (typically `Idea`) to remove the marker prefix. If the title is `🆕 Marie Curie's notebooks behind lead shields`, the new title is `Marie Curie's notebooks behind lead shields`.
+2. **Set Status → "Writing"** so the card moves on the kanban.
 
-If fewer than 5 "New" ideas remain after picking, flag this in the report as "Refill needed."
+Do this BEFORE writing content so the card stops appearing in subsequent `🆕` searches (prevents double-pick by parallel runs).
+
+### Refill warning
+
+If fewer than 5 verified "New" candidates remained after Phase 0, flag in the final report as `Refill needed: New idea count is critically low.`
 
 ---
 
@@ -329,17 +362,18 @@ For each draft:
 
 ---
 
-## PHASE 8 — UPDATE NOTION
+## PHASE 8 — UPDATE NOTION (state transition: Writing → Needs Media)
 
-For each processed idea, use `notion-update-page` to:
+For each processed idea, use `notion-update-page` with all changes in one call:
 
-- Save Typefully Draft ID
-- Save Typefully Shared URL
-- If QRT found via search, save to QRT Source URL
-- Set Status → **"Needs Media"**
-- Update Notes — append: `Content generated [date]. Format: [Tuki QRT / Long-Form Post]. [QRT found — URL / standalone]. Tagged needs-media.`
+1. **Prepend `📺 ` to the title.** This is the marker that tells the local media-attacher task to pick this card up. The title goes from `Marie Curie's notebooks behind lead shields` → `📺 Marie Curie's notebooks behind lead shields`.
+2. **Set Status → "Needs Media"** so the card moves on the kanban.
+3. Save **Typefully Draft ID**.
+4. Save **Typefully Shared URL**.
+5. If QRT found via search, save to **QRT Source URL**.
+6. Append to **Notes**: `Content generated [date]. Format: [Tuki QRT / Long-Form Post]. [QRT found — URL / standalone]. 📺 marker added — handed off to media-attacher.`
 
-**NOTE:** Always set "Needs Media" — never "Ready for Review". The media-attacher task attaches clips/GIFs and advances to "Ready for Review". Even standalone posts may need a clip or image.
+**NOTE:** Always set "Needs Media" with `📺 ` marker — never "Ready for Review" directly. The media-attacher task picks up `📺` cards, attaches clips/GIFs, removes the `📺` marker, and advances to "Ready for Review". Even standalone posts may need a clip or image.
 
 ---
 

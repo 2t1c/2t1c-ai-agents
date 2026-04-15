@@ -16,8 +16,8 @@ This is an automated run of a scheduled task. The user is not present to answer 
 - **Notion:**
   - `notion-fetch` — read a single page or data source schema
   - `notion-update-page` — write to a page
-  - `mcp__notion__API-query-data-source` — **REAL filter queries** for Status (use this everywhere)
-  - **NEVER use `notion-search` for Status filtering** — it is semantic search and ignores property filters
+  - `notion-search` — enumerate pages in a data source (semantic; **does NOT honor property filters**)
+  - **There is no property-filter query tool.** The cloud-routine Notion MCP does not include `API-query-data-source`. Use the enumerate-then-fetch pattern (see Step 1 below).
 - **Typefully:**
   - `typefully_list_drafts`, `typefully_get_draft`
 

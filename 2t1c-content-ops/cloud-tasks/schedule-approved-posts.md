@@ -17,8 +17,8 @@ This is an automated run of a scheduled task. The user is not present to answer 
 - **Notion:**
   - `notion-fetch` — read a single page or data source schema
   - `notion-update-page` — write to a page
-  - `mcp__notion__API-query-data-source` — **REAL filter queries** (use this for "give me all pages where Status = X")
-  - **NEVER use `notion-search` for Status filtering** — it is semantic search and ignores property filters
+  - `notion-search` — enumerate pages in a data source (semantic; **does NOT honor property filters**)
+  - **There is no property-filter query tool.** The cloud-routine Notion MCP does not include `API-query-data-source`. Use the enumerate-then-fetch pattern (see Step 1 below).
 - **Typefully:**
   - `typefully_list_drafts`, `typefully_get_draft`, `typefully_edit_draft`, `typefully_delete_draft`
   - `typefully_get_queue`, `typefully_get_social_set_details`
@@ -28,27 +28,19 @@ This is an automated run of a scheduled task. The user is not present to answer 
 
 ## PART 1 — SCHEDULE APPROVED POSTS
 
-### Step 1: Find Approved posts (use API-query-data-source)
+### Step 1: Find Approved posts (enumerate-then-fetch pattern)
 
-Call `mcp__notion__API-query-data-source` with:
+The cloud-routine Notion MCP has no property-filter query tool. To find pages with Status="Approved":
 
-```json
-{
-  "data_source_id": "330aef7b-3feb-401e-abba-28452441a64d",
-  "filter": {
-    "property": "Status",
-    "select": { "equals": "Approved" }
-  },
-  "sorts": [
-    { "property": "Created time", "direction": "descending" }
-  ],
-  "page_size": 100
-}
-```
+**1a.** Call `notion-search` with `query: ""`, `data_source_url: collection://330aef7b-3feb-401e-abba-28452441a64d`, `page_size: 25`. Paginate via `start_cursor` until exhausted. Collect all page IDs.
 
-If the Status property type is `status` (Notion's newer schema) instead of `select`, swap the filter to `"status": { "equals": "Approved" }`. Fetch the data source schema first via `notion-fetch` if unsure.
+**1b.** In parallel batches of 10, call `notion-fetch` on each page ID. Read the Status property.
 
-For each result, collect: Idea title, Created time, Typefully Draft ID, Urgency, Topic Tags, Notes.
+**1c.** Filter client-side to keep only pages where `Status == "Approved"`. Sort by Created time (newest first).
+
+For each kept page, collect: Idea title, Created time, Typefully Draft ID, Urgency, Topic Tags, Notes.
+
+**Performance note:** This costs ~5-12 search calls + ~100-300 fetches. Roughly 30-90 seconds for the whole pipeline scan. The same enumerate-then-fetch is reused for Steps 5 and 6 below — **fetch all pages ONCE, then filter the same parsed list for "Scheduled" and "Killed" instead of re-enumerating.**
 
 ### Step 2: Check Typefully queue for open slots
 
@@ -137,18 +129,9 @@ For all scheduled posts:
 
 ## PART 2 — SYNC PUBLISHED STATUS
 
-### Step 5: Find Scheduled posts (use API-query-data-source)
+### Step 5: Find Scheduled posts
 
-```json
-{
-  "data_source_id": "330aef7b-3feb-401e-abba-28452441a64d",
-  "filter": {
-    "property": "Status",
-    "select": { "equals": "Scheduled" }
-  },
-  "page_size": 100
-}
-```
+Filter the parsed pages from Step 1 (already enumerated and fetched) for `Status == "Scheduled"`. Do not re-enumerate.
 
 For each result, call `typefully_get_draft` using the Typefully Draft ID.
 
@@ -159,20 +142,11 @@ For each result, call `typefully_get_draft` using the Typefully Draft ID.
 
 ## PART 3 — CLEAN UP KILLED DRAFTS
 
-### Step 6: Find Killed posts with remaining Typefully drafts (use API-query-data-source)
+### Step 6: Find Killed posts with remaining Typefully drafts
 
-```json
-{
-  "data_source_id": "330aef7b-3feb-401e-abba-28452441a64d",
-  "filter": {
-    "property": "Status",
-    "select": { "equals": "Killed" }
-  },
-  "page_size": 100
-}
-```
+Filter the parsed pages from Step 1 for `Status == "Killed"` AND `Typefully Draft ID is not empty`.
 
-For each result that still has a Typefully Draft ID set:
+For each result:
 - Call `typefully_delete_draft` to remove from Typefully
 - Use `notion-update-page` to clear Typefully Draft ID and Typefully Shared URL
 

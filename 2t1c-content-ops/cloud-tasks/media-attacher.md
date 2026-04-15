@@ -4,9 +4,54 @@ You are the media attachment agent for GeniusGTX. Your job: find posts that need
 
 This task runs LOCALLY because it needs ffmpeg for clip extraction.
 
+## Marker convention
+
+Cards waiting for media have **`📺 `** prepended to their title. The `content-generator` task adds this marker when it hands off a card from "Writing" → "Needs Media". Your job is to:
+1. Find cards with `📺` in the title
+2. Attach media
+3. **Remove `📺 ` from the title** when promoting to "Ready for Review"
+
+State machine (relevant to this task):
+
+| Status | Title prefix | Set by | Removed by |
+|---|---|---|---|
+| Needs Media | `📺 ` | content-generator | **this task** (Step 3, when promoting) |
+| Ready for Review | (none) | this task | — |
+
 ## Step 1: Find posts that need media
 
-### Primary method — Chrome browser (Pipeline Board)
+### Primary method — Notion API filter (use this first, locally-available)
+
+This task runs LOCALLY where the full Notion API is available. Use `mcp__notion__API-query-data-source` on the Idea Pipeline (data source `330aef7b-3feb-401e-abba-28452441a64d`) with a filter for `Status = "Needs Media"`. This is the most reliable path for the local task.
+
+```json
+{
+  "data_source_id": "330aef7b-3feb-401e-abba-28452441a64d",
+  "filter": {
+    "property": "Status",
+    "select": { "equals": "Needs Media" }
+  },
+  "page_size": 25
+}
+```
+
+For each result, also confirm the title starts with `📺 ` (the marker added by content-generator). If a card has Status = "Needs Media" but no `📺` marker → that's an inconsistent state, log it for review but still process it.
+
+### Fallback — Marker search (if API filter fails)
+
+If `API-query-data-source` is unavailable, use `mcp__8c435ebc-a4fb-4d84-8d81-5f650405b5f9__notion-search`:
+
+```json
+{
+  "query": "📺",
+  "data_source_url": "collection://330aef7b-3feb-401e-abba-28452441a64d",
+  "page_size": 25
+}
+```
+
+Title-match results land at the top. For each, `notion-fetch` to verify Status == "Needs Media" before processing.
+
+### Fallback — Chrome browser (Pipeline Board, if both API paths fail)
 
 1. Get a tab with `mcp__Claude_in_Chrome__tabs_context_mcp` (createIfEmpty: true).
 2. Navigate to the Pipeline Board:
@@ -24,24 +69,12 @@ Cap at 10 qualifying ideas per run.
 **Also scan "Ready for Review" posts for broken QRTs:**
 After collecting "Needs Media" items, run a secondary scan on up to 5 posts currently in the `"Ready for Review"` status where `quote_post_url` is set. These will go through QC check 4b (live QRT verification) only — skip all other processing. If their QRT is found to be broken, apply the broken QRT remediation flow (see QC check 4b below) and leave them in "Ready for Review" after fixing. Cap this secondary scan at 5 items and count them separately from the 10 "Needs Media" items.
 
-### Fallback — Notion API property filter
-
-If Chrome is unavailable, use `mcp__notion__API-query-data-source` on the Idea Pipeline database (`c4fed84bf0a94459bad369c93f3de40a`) with a filter for `Status = "Needs Media"`.
-
-### Fallback — Notion MCP search + fetch filter
-
-If the API also fails, use `mcp__8c435ebc-a4fb-4d84-8d81-5f650405b5f9__notion-search` with:
-- `data_source_url: collection://330aef7b-3feb-401e-abba-28452441a64d`
-- `query: "Needs Media"`
-- `page_size: 25`
-
-Then for each result, call `notion-fetch` and keep only pages where `Status` = `"Needs Media"`.
-
 ### For each qualifying idea, read:
 - Typefully Draft ID(s) — may be comma-separated if multiple drafts
 - Source URL
 - Source Type (YouTube / Twitter / Articles)
 - Notes (may contain clip timestamps in format `"Clip: MM:SS → MM:SS"`)
+- Current title (so you can strip `📺 ` from it in Step 3)
 
 ---
 
@@ -172,14 +205,24 @@ Steps:
 
 ---
 
-## Step 3: Update Notion
+## Step 3: Update Notion (state transition: Needs Media → Ready for Review)
 
-After **successfully attaching media AND passing QC**:
-- Set `Status` → `"Ready for Review"`
+After **successfully attaching media AND passing QC**, use `notion-update-page` with both changes in one call:
 
-If **all media attachment attempts failed** OR **QC failed**:
-- Add failure/QC note to `Notes` field
-- Leave `Status` as `"Needs Media"` (or set it if currently null) for manual handling
+1. **Strip `📺 ` from the title.** Update the title property (typically `Idea`) to remove the marker prefix. If the title is `📺 Marie Curie's notebooks behind lead shields`, the new title is `Marie Curie's notebooks behind lead shields`.
+2. **Set Status → "Ready for Review"** so the card moves on the kanban.
+
+This signals the next stage (human review or pipeline-qa auto-approve) that media work is done.
+
+### If media attachment failed OR QC failed:
+
+- **Do NOT strip `📺 ` from the title.** The card needs to stay visible to this task on the next run.
+- Add failure/QC note to `Notes` field with details.
+- Leave `Status` as `"Needs Media"` (or set it back if currently null) for manual handling.
+
+### Edge case — card has no `📺` marker but Status was "Needs Media"
+
+If you processed a card that didn't have the `📺` marker (inconsistent state from earlier runs), still strip nothing on promotion (there's nothing to strip) but log it: `[Marker missing] Promoted card without 📺 marker — content-generator may have skipped marker addition.`
 
 ---
 

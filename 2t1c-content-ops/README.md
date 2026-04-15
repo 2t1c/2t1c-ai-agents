@@ -106,6 +106,34 @@ That's it. **All future rule changes happen in git → push → cloud routine pi
 
 ---
 
+## Title marker convention (state-machine encoding)
+
+Cloud-routine Notion MCP has no property-filter query tool — `notion-search` is semantic only and silently ignores property filters. To work around this, the pipeline encodes "actionable state" in title prefixes that `notion-search` can find reliably (title matches rank highest in semantic search).
+
+| Status | Title prefix | Set by | Removed by |
+|---|---|---|---|
+| New | `🆕 ` | **Ideation agent** (you, when creating a new card) | content-generator (Phase 1, when picking) |
+| Writing | (none) | content-generator | (next transition) |
+| Needs Media | `📺 ` | content-generator (Phase 8, when handing off) | media-attacher (when media done) |
+| Ready for Review | (none) | media-attacher | — |
+| Approved / Scheduled / Published / Killed | (no marker) | — | — |
+
+### Critical: the ideation agent must add `🆕 ` to every new card
+
+When creating a card in the Idea Pipeline (manually or via your ideation script), **always prepend `🆕 ` to the title**. Without the marker, content-generator will not find the card.
+
+Example:
+- ✅ `🆕 In 1847, a Hungarian doctor cut maternal deaths from 18% to 2%`
+- ❌ `In 1847, a Hungarian doctor cut maternal deaths from 18% to 2%` (won't be picked up)
+
+If you forget the marker, you can fix it by editing the title in Notion to add `🆕 ` at the start. content-generator will pick it up on the next run.
+
+### Why markers and not Notion views?
+
+Per-status Notion views would also work and would be slightly faster, but require manual setup of 4-8 views in the Notion UI. The marker approach works with zero Notion configuration and is more portable across data sources. If you ever want to migrate to views, the agents can switch with a one-line spec change.
+
+---
+
 ## Voice principles (the short version)
 
 GeniusGTX is a gallery for the greatest minds in economics, psychology, and history. The voice carries weight without announcing itself.
