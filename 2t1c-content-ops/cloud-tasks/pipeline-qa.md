@@ -8,6 +8,24 @@ Notion Idea Pipeline data source: collection://330aef7b-3feb-401e-abba-28452441a
 Use the Notion MCP connector for all Notion operations (notion-search, notion-fetch, notion-update-page).
 Use the Typefully MCP for all Typefully operations.
 
+STEP -1 — TAB STATUS BEGIN (run first, before anything else)
+Run Bash immediately as your very first action:
+  `bash ~/.claude/lib/tab-status.sh begin pipeline-qa`
+This writes a busy flag to `~/.claude/state/tabs/pipeline-qa.json` so the daily tab-cleanup sweep knows this task is live and will not close tabs it might need. On successful completion call `done` (Step 10). If you abort early (e.g. preload failure), call `fail` instead.
+
+STEP 0 — TOOL PRELOAD (MANDATORY, RUN FIRST)
+This task is non-interactive. MCP tools are lazy-loaded via ToolSearch, and a first-try miss has no human to retry it. Before doing ANY other work, preload every tool this task needs in a single batch so later calls cannot fail with "tool not found".
+
+Run these ToolSearch calls in parallel as your very first action:
+  1. ToolSearch({ query: "notion", max_results: 20 })
+  2. ToolSearch({ query: "typefully", max_results: 20 })
+
+Verify after preload that the following tool names appear in the loaded set before proceeding. If any are missing, run a targeted ToolSearch for that specific name (e.g. `select:<exact_tool_name>`) and retry once:
+  - notion-search, notion-fetch, notion-update-page
+  - typefully_list_drafts, typefully_get_draft, typefully_get_queue
+
+If after two ToolSearch attempts a required tool is still unavailable, abort the run and report which tool failed to load. Do NOT attempt to call unloaded tools — that produces the "deferred tool" error.
+
 STEP 1: Fetch All "Ready for Review" Ideas
 Query the Idea Pipeline (collection://330aef7b-3feb-401e-abba-28452441a64d) for all ideas with Status = "Ready for Review".
 
@@ -164,3 +182,14 @@ Schedule issues found: [count]
 Stale items flagged: [count]
 Duplicates flagged: [count]
 Status corrections made: [count]
+
+RULES
+- Notion is the single source of truth — no Typefully tags. Never create, add, or modify tags on Typefully drafts. All status tracking lives in Notion.
+- Never delete Typefully drafts. Only move Notion statuses.
+
+STEP 10 — TAB STATUS END (run last, after the report)
+As your final action, run Bash:
+  `bash ~/.claude/lib/tab-status.sh done pipeline-qa`
+If you aborted earlier (preload failure or any unrecovered error), run `fail` instead:
+  `bash ~/.claude/lib/tab-status.sh fail pipeline-qa`
+Either call clears the busy flag so the next daily cleanup sweep can reclaim any tabs associated with this run.

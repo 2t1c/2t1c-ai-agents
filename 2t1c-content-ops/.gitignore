@@ -4,3 +4,14 @@ __pycache__/
 .venv/
 node_modules/
 mutation_log.json
+
+# macOS noise
+.DS_Store
+**/.DS_Store
+
+# Runtime output (regenerated each run)
+logs/
+cloud-tasks/*-output-*.md
+
+# Client work — never commit
+JEMS-U30-*.md
