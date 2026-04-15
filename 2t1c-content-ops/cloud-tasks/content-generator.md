@@ -41,7 +41,11 @@ These five files are the **complete voice + structure rulebook**. Apply them exa
 
 - **Notion Idea Pipeline data source:** `collection://330aef7b-3feb-401e-abba-28452441a64d`
 - **Typefully social set ID** (GeniusGTX_2): `151393`
-- **Use the Notion MCP** for ALL Notion operations — `notion-search`, `notion-fetch`, `notion-update-page`
+- **Use the Notion MCP** for Notion operations:
+  - `notion-fetch` — read a single page or data source schema
+  - `notion-update-page` — write to a page
+  - `mcp__notion__API-query-data-source` — **REAL filter queries** (use this for "give me all pages where Status = X")
+  - `notion-search` — semantic search ONLY (use only for fuzzy text discovery, NEVER for Status filtering — semantic search does not honor property filters and returns relevance-ranked results, not filtered results)
 - **Use the Typefully MCP** for all Typefully operations
 
 ---
@@ -60,26 +64,47 @@ These five files are the **complete voice + structure rulebook**. Apply them exa
 
 Before anything else, get a full view of the pipeline.
 
-**DO NOT use semantic search to find ideas by status.** Semantic search misses New ideas because they have sparse content and score low in relevance. Always use direct database queries filtered by Status.
+**⚠️ CRITICAL: Use `mcp__notion__API-query-data-source`, NOT `notion-search`.**
+
+`notion-search` is **semantic search** — it ranks pages by text relevance and ignores structured property filters. Querying it with "Status = New" returns relevance-similar pages, not pages where the Status property actually equals "New". This is the most common failure mode of this task.
+
+The correct tool is `mcp__notion__API-query-data-source` — it executes real database filter queries against the Notion API.
 
 ### Step 1 — Fetch the schema
 
-Use `notion-fetch` on `collection://330aef7b-3feb-401e-abba-28452441a64d` to confirm property names.
+Use `notion-fetch` on `collection://330aef7b-3feb-401e-abba-28452441a64d` to confirm the exact name of the Status property and its select option values.
 
-### Step 2 — Query each status bucket
+### Step 2 — Query each status bucket via API-query-data-source (run in parallel)
 
-Run all 8 queries in parallel using `notion-search` on the Idea Pipeline with a Status filter:
+Data source ID: `330aef7b-3feb-401e-abba-28452441a64d` (strip the `collection://` prefix).
 
-- Status = "New"
-- Status = "Writing"
-- Status = "Needs Media"
-- Status = "Ready for Review"
-- Status = "Approved"
-- Status = "Scheduled"
-- Status = "Published"
-- Status = "Killed"
+For EACH of the 8 status values, call `mcp__notion__API-query-data-source` with this exact filter shape:
 
-Each query returns the exact pages in that status — no guessing, no missing items.
+```json
+{
+  "data_source_id": "330aef7b-3feb-401e-abba-28452441a64d",
+  "filter": {
+    "property": "Status",
+    "select": {
+      "equals": "New"
+    }
+  },
+  "page_size": 100
+}
+```
+
+Run all 8 queries in parallel, one per status value:
+- "New", "Writing", "Needs Media", "Ready for Review", "Approved", "Scheduled", "Published", "Killed"
+
+If the Status property type is not `select` (could be `status` in Notion's newer schema), use `"status": { "equals": "New" }` instead. The schema fetched in Step 1 will tell you which.
+
+Each query returns ONLY pages where the Status property genuinely equals the queried value. No semantic noise. No guessing.
+
+### Step 2 fallback (only if API-query-data-source is unavailable)
+
+If the `mcp__notion__API-query-data-source` tool failed to load or is otherwise unavailable:
+1. Call `mcp__notion__API-post-search` with `query: ""` (empty) and `filter: { "property": "object", "value": "page" }` to get all pages, then client-side filter by `properties.Status.select.name`. Slow but correct.
+2. **Do NOT fall back to `notion-search` with property filters** — it will silently return wrong results and the task will burn its 3-draft budget on stale or duplicate ideas.
 
 ### Output — Pipeline snapshot
 
