@@ -23,6 +23,39 @@ This is an automated run of a scheduled task. The user is not present to answer 
 
 ---
 
+## STEP 0 — LOAD MCP CONNECTORS (run before anything else, no exceptions)
+
+The Notion and Typefully connectors are deferred and must be loaded via ToolSearch before any other step. Do not ask for confirmation — execute immediately. Do not pause. Do not report missing tools — just load them.
+
+### Step 0.1 — Bulk load in parallel
+
+```
+ToolSearch({ query: "notion", max_results: 20 })
+ToolSearch({ query: "typefully", max_results: 20 })
+```
+
+### Step 0.2 — Verify both connectors are live (in parallel)
+
+```
+notion-fetch on collection://330aef7b-3feb-401e-abba-28452441a64d
+typefully_get_me
+```
+
+### Step 0.3 — Retry once if verification fails
+
+If either verification call fails with `"tool not found"` or `InputValidationError`, retry the relevant ToolSearch ONCE with a precise selector:
+
+```
+ToolSearch({ query: "select:notion-fetch,notion-search,notion-update-page", max_results: 5 })
+ToolSearch({ query: "select:typefully_get_me,typefully_list_drafts,typefully_get_draft", max_results: 5 })
+```
+
+Then re-verify. If still failing after retry, abort the run and report which connector failed.
+
+Only after both connectors are verified live, proceed to Step 1.
+
+---
+
 ## STEP 1: Fetch all "Ready for Review" ideas
 
 Call `mcp__notion__API-query-data-source`:

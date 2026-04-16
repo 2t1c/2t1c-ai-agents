@@ -8,14 +8,34 @@ This is an automated run of a scheduled task. The user is not present to answer 
 
 ## STEP 0 — LOAD MCP CONNECTORS (run before anything else, no exceptions)
 
-The Notion and Typefully connectors are deferred and must be loaded via ToolSearch before any other step. Do not ask for confirmation — execute immediately.
+The Notion and Typefully connectors are deferred and must be loaded via ToolSearch before any other step. Do not ask for confirmation — execute immediately. Do not pause. Do not report missing tools — just load them.
 
-1. Call `ToolSearch` with query `"notion"` and max_results 10 — loads the Notion MCP tools
-2. Call `ToolSearch` with query `"typefully"` and max_results 10 — loads the Typefully MCP tools
-3. Call `notion-fetch` on `collection://330aef7b-3feb-401e-abba-28452441a64d` to confirm Notion is live
-4. Call `typefully_get_me` to confirm Typefully is live
+### Step 0.1 — Bulk load in parallel
 
-Do not pause. Do not ask if connectors are available. Only abort if ToolSearch returns zero results for both queries.
+```
+ToolSearch({ query: "notion", max_results: 20 })
+ToolSearch({ query: "typefully", max_results: 20 })
+```
+
+### Step 0.2 — Verify both connectors are live (in parallel)
+
+```
+notion-fetch on collection://330aef7b-3feb-401e-abba-28452441a64d
+typefully_get_me
+```
+
+### Step 0.3 — Retry once if verification fails
+
+If either verification call fails with `"tool not found"` or `InputValidationError`, retry the relevant ToolSearch ONCE with a precise selector:
+
+```
+ToolSearch({ query: "select:notion-fetch,notion-search,notion-update-page", max_results: 5 })
+ToolSearch({ query: "select:typefully_get_me,typefully_create_draft,typefully_list_social_sets,typefully_edit_draft,typefully_get_draft,typefully_create_media_upload", max_results: 10 })
+```
+
+Then re-verify. If still failing after retry, abort the run and report which connector failed.
+
+Only after both connectors are verified live, proceed to Step 0.5.
 
 ---
 
