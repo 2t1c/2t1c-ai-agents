@@ -273,25 +273,91 @@ If either check fails: do NOT save the URL. Leave QRT Source URL empty, mark the
 
 ---
 
-## PHASE 4 — WRITE THE HOOK
+## PHASE 4 — WRITE THE HOOK (swipe-file-first, top-of-funnel)
 
-Apply [hook-writing.md](https://raw.githubusercontent.com/2t1c/2t1c-ai-agents/main/2t1c-content-ops/docs/hook-writing.md) (already fetched in Step 0.5).
+Stop overthinking hooks. The job is simple: **find the single most interesting fact or angle in your research, and write it like a thread hook that would stop a stranger mid-scroll.**
 
-**Required output:** a hook unit (250-300 chars for long-form, under 280 for QRT) that passes the SETUP → STAKES → PIVOT → PROMISE spine. Line 1 must be under 20 words.
+### Step 4.1 — Pick the top-of-funnel angle (before writing anything)
 
-**Key rules from hook-writing.md:**
+From the facts you gathered in Phase 2, pick the ONE angle that resonates widest — the thing a non-expert scrolling past would stop for. Not the angle you find intellectually interesting. The angle that lands on a cold audience.
 
-- Run angle filters (Identity Attack / Time Collapse / Direct Address) — must pass at least one
-- Run Visualization Test — REQUIRED before writing
-- Hit at least one primal trigger (betrayal / survival / love / vulnerability / sacrifice / injustice at scale)
-- Use opener types as compositional vocabulary (often combine 2-4 in one unit)
-- Numbers exact and comparative
-- Speed reveals use "just"
-- Use [swipe-file.md](https://raw.githubusercontent.com/2t1c/2t1c-ai-agents/main/2t1c-content-ops/docs/swipe-file.md) for inspiration on wording, NOT verbatim copying
+Litmus test: *"If my mom (who doesn't follow this topic) saw line 1, would she pause?"* If no, pick a different angle.
 
-**Format-adapted closer:**
-- Tuki QRT → explicit closer ("Here's how:", "A thread")
-- Long-form → implicit closer (last line opens a mystery the body resolves)
+Strong top-of-funnel angles are usually one of:
+- A specific number that's absurd in context ($155 GDP, 28 days, $4M/month burning)
+- An unexpected juxtaposition (poorer than Chad / greatest trader ever / two gaming GPUs beat every elite lab)
+- A named authority doing something no one expects (Marie Curie's notebooks still lethal, Sam Altman on anxiety)
+- A time collapse (same fact, two eras, the gap IS the hook)
+- A hidden consequence (nearly destroyed physics, buried for 30 years)
+
+If your best fact isn't one of these, keep researching — you don't have a hook yet.
+
+### Step 4.2 — Pull 2-3 swipe-file hooks that match your angle
+
+**This step is mandatory.** Open [swipe-file.md](https://raw.githubusercontent.com/2t1c/2t1c-ai-agents/main/2t1c-content-ops/docs/swipe-file.md) (fetched in Step 0.5) and find 2-3 hooks whose **shape** matches your idea — same content category, similar opener move, similar number/contrast rhythm.
+
+In your working notes, quote the swipe hooks you're modeling on. Example:
+```
+Modeling on:
+- "In 1978, China was poorer than Chad, Bangladesh, and Malawi." (Type B year anchor + contrast)
+- "Tesla was burning $4M per month on a car no one wanted. 0 sold. 3 weeks from bankruptcy." (stacked micro-facts)
+```
+
+This forces the hook to sound like the voice, not like a generic summary.
+
+### Step 4.3 — Write the hook AS A THREAD HOOK
+
+Write it like you're trying to get the tap, even for long-form. Thread-hook cadence = short lines, one idea per line, specific numbers, one sharp turn.
+
+Minimum bar:
+- **Line 1:** under 20 words, contains a specific number or named entity, scroll-stops on its own
+- **Total hook unit:** 250-300 chars (long-form), under 280 (QRT)
+- **One clear turn** (the "but"/"then"/"here's why" pivot)
+- **No generic openers.** Banned: "In the world of...", "Most people don't realize...", "It's fascinating that...", "Did you know...", anything that could apply to any topic.
+
+### Step 4.4 — Withhold the mechanism (do not spoil the body)
+
+The hook names the authority and the frame. The body delivers the mechanism. Hold back:
+
+- The specific fix (e.g. "$50 vaccine", "one regulation", "a single phone call")
+- The specific actor (e.g. "the cook", "the engineer", "the whistleblower")
+- The specific pathogen / product / exact failure mode
+- The exact body count or dollar figure tied to the reveal
+
+These are body reveals. The hook should make the reader need them — not hand them over.
+
+**Named institutional villains > generic mechanisms.** Use FDA, FBI, FED, CIA, SEC, WHO, Pentagon, DOJ, specific companies and named individuals. Never "a federal agency", "authorities", "regulators", "someone". Named authorities scroll-stop on their own.
+
+**Verb upgrades.** Swap neutral verbs for the approved pivot list: *buried, exposed, collapsed, seized, bankrupt, terrified, unleashed, rewrote, disrupted, refused.* Never: *decided to, started to, tried to, worked on, began.*
+
+### Step 4.5 — Self-check before moving on
+
+Answer these in one line each. If any is weak, rewrite:
+
+1. Would a cold scroller stop on line 1? (Why?)
+2. Which swipe-file hook is this closest to in shape?
+3. What's the specific number or named entity doing the work?
+4. What's the one turn?
+5. What's being withheld for the body? (Must be at least one concrete mechanism / actor / figure.)
+
+### Closer (always explicit)
+
+Every hook — Tuki QRT AND long-form — ends with an **explicit closer** that opens the door into the body. Match the swipe file exactly.
+
+Examples from the swipe file:
+- *"Here's how [NAME] did it:"*
+- *"Here's the full story:"*
+- *"Here's the part that'll haunt you:"*
+- *"Here's what nobody tells you:"*
+- *"Here's the forgotten story:"*
+- *"A thread"* / *"🧵"*
+- *"Let me save you 3 hours — here are the [N] most important things:"*
+- *"Once you understand how X, you'll Y:"*
+
+Pick the closer that best tees up the body's first reveal. Never skip it. Never use an implicit door.
+
+### Reference (optional deep dive)
+[hook-writing.md](https://raw.githubusercontent.com/2t1c/2t1c-ai-agents/main/2t1c-content-ops/docs/hook-writing.md) has the full taxonomy (opener types A-N, escalation types, pivot verbs, triggers). Consult only when stuck — do NOT try to satisfy every filter. The swipe file is the primary reference; hook-writing.md is the glossary.
 
 ---
 

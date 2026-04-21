@@ -45,21 +45,14 @@ If a hook lacks one of these four beats, it feels off.
 
 This is the only thing that differs between formats:
 
-- **Tuki QRT / thread format → explicit closer.** *"Here's how he did it:" / "Here's the full story:" / "A thread"*
-- **Long-form single post → implicit closer.** The last line of the hook unit opens a mystery the body immediately resolves. No "here's how" — the next paragraph IS the "here's how."
+- **All formats → explicit closer.** Tuki QRT, thread, AND long-form single post. Always use *"Here's how he did it:" / "Here's the full story:" / "Here's the part the [authority] has known since [year]:" / "A thread"*. Match the swipe file exactly. Never use an implicit closer.
 
-**Example — same story, two formats:**
+**Example (explicit door — use this shape in every format):**
 
-Thread version (explicit door):
 > "In 2008, Elon pulled off the greatest comeback in corporate history.
 > Tesla was burning $4M per month on a car no one wanted. 0 sold. 3 weeks from bankruptcy.
 > Then he made a move so risky it almost landed him in prison.
 > **Here's the crazy story:**"
-
-Long-form version (implicit door):
-> "In 2008, Elon pulled off the greatest comeback in corporate history.
-> Tesla was burning $4M per month on a car no one wanted. 0 sold. 3 weeks from bankruptcy.
-> **Then he made a move so risky it almost landed him in prison.**"
 
 ---
 
@@ -290,7 +283,7 @@ Cinematic. Names the subject like you're being ushered into a room.
 Freezes the reader inside collective anticipation.
 - *"But his first move has Silicon Valley holding its breath:"*
 
-**Format note:** Types A-G are all **explicit** closers. Use them in Tuki QRT / thread format. For long-form single posts, **adapt** — strip the explicit closer and let the line preceding it become the implicit door.
+**Format note:** Types A-G are all **explicit** closers. Use them in every format — Tuki QRT, thread, and long-form single post alike. Never strip them.
 
 ---
 

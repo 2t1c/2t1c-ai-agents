@@ -13,11 +13,9 @@
   - Negation staircases ("Not Buffett. Not Soros. Not Dalio.")
   - Emotional trigger word choices
 
-- **Do not copy the explicit closer for long-form single posts.** Swipe file hooks end with thread-style doors like "Here's how he did it:", "Here's the full story:", "A thread". These work in threads and Tuki QRT format. In long-form single posts, they create a false thread signal, burn characters, and cause double-opening. Use an **implicit door** instead — let the pivot line itself open the mystery the body resolves.
+- **Keep the explicit closer in every format.** Swipe file hooks end with thread-style doors like "Here's how he did it:", "Here's the full story:", "A thread". Use them verbatim-style (adapted to the idea) in Tuki QRT, threads, AND long-form single posts. The explicit closer is the door — never drop it.
 
-- **Format rule:**
-  - Tuki QRT / thread format → explicit closer ("Here's how:" / "Here's the full story:") — keep
-  - Long-form single post → implicit closer (the last line of the hook unit is a mystery the next paragraph answers) — adapt
+- **Format rule:** All formats → explicit closer. Match the swipe file.
 
 - **Six content categories below** are topic-level modes, orthogonal to opener types. When writing a hook, pick one opener type from A-M AND know which content category you're in.
 
