@@ -46,6 +46,7 @@ The writing rules, hook system, CTA template, community registry, and swipe file
 Run these in parallel:
 
 ```
+WebFetch https://raw.githubusercontent.com/2t1c/2t1c-ai-agents/main/2t1c-content-ops/docs/idea-selection.md
 WebFetch https://raw.githubusercontent.com/2t1c/2t1c-ai-agents/main/2t1c-content-ops/docs/writing-style.md
 WebFetch https://raw.githubusercontent.com/2t1c/2t1c-ai-agents/main/2t1c-content-ops/docs/hook-writing.md
 WebFetch https://raw.githubusercontent.com/2t1c/2t1c-ai-agents/main/2t1c-content-ops/docs/cta-template.md
@@ -53,7 +54,7 @@ WebFetch https://raw.githubusercontent.com/2t1c/2t1c-ai-agents/main/2t1c-content
 WebFetch https://raw.githubusercontent.com/2t1c/2t1c-ai-agents/main/2t1c-content-ops/docs/swipe-file.md
 ```
 
-These five files are the **complete voice + structure rulebook**. Apply them exactly when writing the hook, body, and CTA. Do not improvise rules not in these files.
+These six files are the **complete voice + structure + idea-quality rulebook**. Apply them exactly when picking ideas and writing the hook, body, and CTA. Do not improvise rules not in these files.
 
 ---
 
@@ -177,16 +178,50 @@ This snapshot goes in the final report.
 
 Use the verified "New" candidates from Phase 0. Do NOT run a new search.
 
-If 0 New candidates were found, conclude the pipeline is empty and stop.
+### Step 1 — Apply the Universal Familiarity cornerstone (mandatory first filter)
 
-**Priority order:**
+Apply [idea-selection.md](https://raw.githubusercontent.com/2t1c/2t1c-ai-agents/main/2t1c-content-ops/docs/idea-selection.md) (already fetched in Step 0.5).
 
-- 🔴 Breaking (highest — process first, time-sensitive)
-- 🟡 Trending
-- 🟢 Evergreen
-- ⚪ Backlog (lowest)
+For each candidate, answer both questions out loud in the report:
+
+1. **10-year-old test:** Can a 10-year-old picture the thing in the hook, with no context?
+2. **PhD test:** Would a specialist in the field recognize the reveal as real and non-obvious?
+
+**Both must be yes.** If either fails, skip the candidate — even if tagged 🔴 Breaking.
+
+### Step 2 — Score the four supporting traits
+
+For candidates that pass the cornerstone, score 0–4 on:
+
+1. Lone named protagonist vs. established consensus
+2. Physical / evidentiary resolution
+3. Teachable framework as the payoff
+4. No expiration
+
+Record the score in the report: `Archetype score: 4/4 — named protagonist (Houdin), muon evidence, inversion model, evergreen.`
+
+### Step 3 — Pick by archetype quality, urgency as tiebreaker
+
+Sort candidates by archetype score first. Urgency is the tiebreaker between equal-archetype candidates, NOT the primary sort. A 🟢 Evergreen card scoring 5/5 (cornerstone + 4 traits) beats a 🔴 Breaking card scoring 1/5.
 
 Pick **2-3 ideas. NEVER more than 3.**
+
+### Step 4 — If zero cards pass the cornerstone, self-source
+
+Do NOT draft a weak post just to fill the run. Instead:
+
+1. Flag in the report: `Pipeline cornerstone failure — no cards passed Universal Familiarity test. Self-sourcing this run.`
+2. Generate 2–3 Pyramid-archetype idea candidates from training + WebSearch, using the hunting grounds in idea-selection.md.
+3. For each self-sourced idea: verify 3+ specific facts via WebSearch before writing.
+4. Create a Notion card in the Idea Pipeline BEFORE writing (Status = Writing, no 🆕 marker, Source URL = primary verification link). This keeps the pipeline the single source of truth.
+5. Proceed to Phase 2 with the self-sourced ideas.
+
+**Priority order** (within same archetype score):
+
+- 🔴 Breaking (time-sensitive)
+- 🟡 Trending
+- 🟢 Evergreen
+- ⚪ Backlog
 
 ### For each picked idea, immediately update Notion (state transition: New → Writing)
 
