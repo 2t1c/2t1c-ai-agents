@@ -120,6 +120,92 @@ The default landing is a **two-step move**:
 
 The contrast builds the tension. The aphorism crystallizes. Reader leaves carrying one sentence.
 
+**Optional third move — name the mental model.** When the post is teaching a transferable lens, name it explicitly right before the CTA bridge. *"That's the inversion model."* / *"The first-order story is X. The second-order story is Y."* Giving the insight a portable label makes the toolkit CTA land on concrete ground — the reader just experienced the framework the toolkit maps.
+
+---
+
+## Narrative Patterns (observed from top-performing posts)
+
+These are principles, not a fixed structure. A post can hit one, several, or all of them depending on the story. They are what separates a prose narrative from an info dump.
+
+### Name the opponent
+
+Never "critics pushed back" or "the industry dismissed it." Name the person, their title, their institution, the exact action.
+
+- ✗ *"Egyptologists dismissed the theory."*
+- ✓ *"UCL Egyptologist David Jeffreys dismissed Houdin's theory as 'far-fetched and horribly complicated.'"*
+
+- ✗ *"The board disagreed with him."*
+- ✓ *"Ilya Sutskever, OpenAI's co-founder, concluded Altman was 'not someone who should press the AGI button.' He tried to fire him. Microsoft brought Altman back within days."*
+
+A named opponent gives the reader a face to hold the tension against. Generic dismissal is forgettable. Specific dismissal is a scene.
+
+### Prose first, → bullets as the exception
+
+Default to prose paragraphs. Use `→` bullets only when:
+
+1. The content is genuinely a list (e.g., Dimon's own 5 interview questions — quoted from him).
+2. A compressed payoff-stack of 3–5 tight facts lands harder as visual rhythm than as prose.
+3. The body is Tuki QRT format (bullets are common there).
+
+**Test:** if the content could be a paragraph without losing anything, make it a paragraph. `→` stacks are memorable when rare — when every post is a bullet list, none of them are.
+
+### The mid-body devastator
+
+Somewhere in the middle of the body, drop **one short line** that breaks the reader's assumption and re-angles the story. It's usually 3–8 words, often a fragment.
+
+- *"None of them."* (after three parallel Altman claims)
+- *"The mechanism had nothing to do with comfort."* (after the sleep-position stat)
+- *"Here's what nobody says out loud."* (before the HSBC systems reveal)
+- *"And suddenly everything fit."* (after the pyramid ramp math failed)
+
+The devastator is the pivot where "interesting facts" becomes "holy shit, the premise was wrong." Every strong post has one. Write it before you write the final aphorism.
+
+### Timeline as pacing device
+
+Specific years inside the body move the story forward, not just anchor it in the hook. Each year advances the case.
+
+- Pyramid: *1986 microgravimetric survey → 1999 Houdin ran the math → 2017 muon radiography detected the void.*
+- Sleep: *"In 2004, researchers discovered…"* lands mid-body after the setup.
+
+When a story has multiple dated events, **sequence them as a timeline** rather than dropping them in passing. The march of years is its own proof.
+
+### Parallel setup + line-reveal (hook option)
+
+A proven hook move — not a required one:
+
+> *Sam Altman told Congress AGI would "cure cancer, solve climate change, and eliminate poverty."*
+> *He told Microsoft it would "generate hundreds of billions in revenue."*
+> *He told consumers it was "the best digital assistant."*
+> *Karen Hao interviewed 90 current and former OpenAI employees to find out which version was real.*
+> *None of them.*
+
+Three parallel claims → one-line devastator. Use when the story is fundamentally about contradiction, misdirection, or betrayal. Don't force it on stories that don't have the three-audiences-one-actor shape.
+
+### Named protagonist + credentials
+
+Not "a researcher" but "**a French architect named Jean-Pierre Houdin**." Not "the CEO" but "**Georges Elhedery. He runs HSBC — $3 trillion in assets, the world's 4th largest bank.**"
+
+The title + institution combo does scroll-stop work on its own. If a protagonist is unnamed in the draft, pull their credential from the source and name them.
+
+### Aphorisms stack — specific then universal
+
+The strongest closes land twice: the specific insight first, then zoom out to the universal principle.
+
+**HSBC:**
+> *The first-order story is AI cutting jobs. The second-order story is AI revealing which jobs were always phantom overhead.*
+> *Understanding that difference is what separates clear analysis from headlines.*
+
+**Sleep:**
+> *Most of what shapes your mind happens before you're awake enough to notice.*
+> *Your physiology broadcasts a state that precedes and shapes your psychology.*
+
+**Altman:**
+> *The destination was never AGI. It was the journey.*
+> *Because a destination means arrival. And arrival means accountability.*
+
+Specific aphorism = the lesson the reader just earned. Universal aphorism = the portable mental model. Reader leaves with both. Still counts as one "aphoristic punch" against the 2-per-post cap (the two layers together are the punch).
+
 ---
 
 ## Aphorisms — woven through, not just at the close
